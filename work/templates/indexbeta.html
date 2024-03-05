@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Drowsiness Detection Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 800px;
+            margin: 20px auto;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        #status, #score {
+            margin-bottom: 10px;
+            text-align: center;
+        }
+        #video-feed {   
+            display: block;
+            margin: 0 auto;
+            width: 100%;
+            max-width: 600px;
+        }
+        button {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        #stop-btn {
+            display: none;
+        }
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>Drowsiness Detection Dashboard</h1>
+        <div id="status"></div>
+        <div id="score"></div>
+        <img id="video-feed" src="/video_feed" alt="Video feed" title="Drowsiness detection video feed">
+        <button id="start-btn">Start Detection</button>
+        <button id="stop-btn">Stop Detection</button>
+    </div>
+
+    <script>
+        $(document).ready(function(){
+            $("#start-btn").click(function(){
+                $.ajax({
+                    type: "POST",
+                    url: "/start_detection",
+                    success: function(data){
+                        $("#status").text(data.status);
+                        $("#start-btn").hide();
+                        $("#stop-btn").show();
+                    },
+                    error: function(){
+                        $("#status").text("Error: Unable to start detection.");
+                    }
+                });
+            });
+
+            $("#stop-btn").click(function(){
+                $.ajax({
+                    type: "POST",
+                    url: "/stop_detection",
+                    success: function(data){
+                        $("#status").text(data.status);
+                        $("#stop-btn").hide();
+                        $("#start-btn").show();
+                    },
+                    error: function(){
+                        $("#status").text("Error: Unable to stop detection.");
+                    }
+                });
+            });
+
+            function getScore() {
+                $.get("/get_score", function(data, status){
+                    $("#score").text("Score: " + data.score);
+                });
+            }
+
+            // โหลดคะแนนเริ่มต้นเมื่อหน้าเว็บโหลด
+            getScore(); 
+
+            // อัปเดตคะแนนทุกๆ 5 วินาที
+            setInterval(getScore, 2000);
+        });
+    </script>
+</body>
+</html>
